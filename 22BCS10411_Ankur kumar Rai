@@ -1,0 +1,108 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class CardCollectionGUI {
+    private Collection<Card> cardCollection = new ArrayList<>();
+    private JFrame frame;
+    private JTextField symbolField, nameField;
+    private JTextArea displayArea;
+
+    public CardCollectionGUI() {
+        frame = new JFrame("Card Collection Manager");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+        frame.setLayout(new BorderLayout());
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(3, 2));
+
+        inputPanel.add(new JLabel("Card Name:"));
+        nameField = new JTextField();
+        inputPanel.add(nameField);
+
+        inputPanel.add(new JLabel("Symbol:"));
+        symbolField = new JTextField();
+        inputPanel.add(symbolField);
+
+        JButton addButton = new JButton("Add Card");
+        addButton.addActionListener(new AddCardListener());
+        inputPanel.add(addButton);
+
+        JButton searchButton = new JButton("Search Cards");
+        searchButton.addActionListener(new SearchCardListener());
+        inputPanel.add(searchButton);
+
+        displayArea = new JTextArea();
+        displayArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(displayArea);
+
+        frame.add(inputPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        frame.setVisible(true);
+    }
+
+    private class AddCardListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String name = nameField.getText().trim();
+            String symbol = symbolField.getText().trim();
+            if (!name.isEmpty() && !symbol.isEmpty()) {
+                cardCollection.add(new Card(name, symbol));
+                displayArea.append("Added: " + name + " [" + symbol + "]\n");
+                nameField.setText("");
+                symbolField.setText("");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Both fields must be filled!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private class SearchCardListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String searchSymbol = symbolField.getText().trim();
+            if (!searchSymbol.isEmpty()) {
+                displayArea.setText("Cards with symbol '" + searchSymbol + "':\n");
+                boolean found = false;
+                for (Card card : cardCollection) {
+                    if (card.getSymbol().equalsIgnoreCase(searchSymbol)) {
+                        displayArea.append(card.getName() + " [" + card.getSymbol() + "]\n");
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    displayArea.append("No cards found with this symbol.\n");
+                }
+            } else {
+                JOptionPane.showMessageDialog(frame, "Enter a symbol to search!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(CardCollectionGUI::new);
+    }
+}
+
+class Card {
+    private String name;
+    private String symbol;
+
+    public Card(String name, String symbol) {
+        this.name = name;
+        this.symbol = symbol;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+}
